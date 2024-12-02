@@ -47,7 +47,7 @@ class UserController extends Controller
 public function index()
 {
     // Your logic here
-    return view('book.index');
+    return view('books.index');
 }
 
 }

@@ -13,8 +13,12 @@ class Book extends Model
         'title',
         'author',
         'genre',
-        'synopsis',
         'available_copies',
     ];
-}
 
+    // Add an accessor to determine if the book is available
+    public function getIsAvailableAttribute()
+    {
+        return $this->available_copies > 0;
+    }
+}

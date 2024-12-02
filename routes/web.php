@@ -8,6 +8,11 @@ use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 // Rute untuk Admin
+Route::get('/', function () {
+    return view('admin.login'); // Mengarah ke file home.blade.php
+});
+
+
 Route::get('/admin/login', [AdminController::class, 'loginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login.submit');
 Route::get('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');

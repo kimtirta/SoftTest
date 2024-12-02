@@ -9,18 +9,22 @@ use Illuminate\Http\Request;
 class BookController extends Controller
 {
     public function index(Request $request)
-    {
-        $books = Book::query();
+{
+    // Fetch books with optional search functionality
+    $books = Book::query();
 
-        if ($request->has('search')) {
-            $books->where('title', 'like', '%' . $request->search . '%')
-                ->orWhere('author', 'like', '%' . $request->search . '%')
-                ->orWhere('genre', 'like', '%' . $request->search . '%');
-        }
-
-        $books = $books->paginate(10);
-        return view('books.index', compact('books'));
+    if ($request->has('search')) {
+        $books->where('title', 'like', '%' . $request->search . '%')
+            ->orWhere('author', 'like', '%' . $request->search . '%')
+            ->orWhere('genre', 'like', '%' . $request->search . '%');
     }
+
+    $books = $books->paginate(10);
+
+    // Pass $books to the view
+    return view('books.index', compact('books'));
+}
+
 
     public function create()
     {
