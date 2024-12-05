@@ -7,14 +7,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Admin extends Authenticatable
 {
-    use HasFactory;
-
-    protected $table = 'admin';
-
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $table = 'admin'; // Explicitly set the table to 'admin'
+    protected $fillable = ['name', 'email', 'password'];
 }
-

@@ -6,8 +6,8 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
     <div class="p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold">Total Users</h2>
-        <p class="text-3xl font-bold">{{ $users->count() }}</p>
-        <a href="{{ route('users.index') }}" class="text-blue-500 mt-2 inline-block">Manage Users</a>
+        <p class="text-3xl font-bold">{{ $total_users }}</p> <!-- Use the total_users variable -->
+        <a href="{{ route('user.dashboard') }}" class="text-blue-500 mt-2 inline-block">Manage Users</a>
     </div>
     <div class="p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold">Total Books</h2>

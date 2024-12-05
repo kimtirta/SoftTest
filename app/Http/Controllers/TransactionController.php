@@ -2,20 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
 use Illuminate\Http\Request;
+use App\Models\Transaction;
+use App\Models\Loan;
 
 class TransactionController extends Controller
 {
     public function index()
     {
-        $transactions = Transaction::with('loan.user', 'loan.book')->paginate(10);
-        return view('transactions.index', compact('transactions'));
+        $transactions = Transaction::with(['loan.user', 'loan.book'])->get();
+
+        return view('transactions.index', ['transactions' => $transactions]);
     }
 
-    public function markAsPaid(Transaction $transaction)
+    public function markAsPaid(Request $request, $id)
     {
+        $transaction = Transaction::findOrFail($id);
+
+        if ($transaction->paid) {
+            return back()->withErrors(['This fine is already paid']);
+        }
+
         $transaction->update(['paid' => true]);
-        return redirect()->route('transactions.index')->with('success', 'Transaction marked as paid.');
+
+        return back()->with('success', 'Transaction marked as paid successfully!');
     }
 }

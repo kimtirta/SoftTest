@@ -25,5 +25,10 @@ class Loan extends Model
     {
         return $this->hasOne(Transaction::class);
     }
+    
+    public function getIsOverdueAttribute()
+    {
+        return !$this->returned_date && now()->greaterThan($this->due_date);
+    }
 }
 

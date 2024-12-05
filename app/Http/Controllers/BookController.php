@@ -2,93 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Book;
 use App\Models\Loan;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookController extends Controller
 {
-    public function index(Request $request)
-{
-    // Fetch books with optional search functionality
-    $books = Book::query();
+    public function index()
+    {
+        $books = Book::paginate(10);
 
-    if ($request->has('search')) {
-        $books->where('title', 'like', '%' . $request->search . '%')
-            ->orWhere('author', 'like', '%' . $request->search . '%')
-            ->orWhere('genre', 'like', '%' . $request->search . '%');
+        return view('books.index', ['books' => $books]);
     }
 
-    $books = $books->paginate(10);
-
-    // Pass $books to the view
-    return view('books.index', compact('books'));
-}
-
-
-    public function create()
+    public function indexForUsers()
     {
-        return view('books.create');
+        $books = Book::paginate(10);
+
+        return view('books.index', ['books' => $books]);
     }
 
-    public function store(Request $request)
+    public function borrow(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'genre' => 'nullable|string|max:255',
-            'available_copies' => 'required|integer|min:1',
+        $book = Book::findOrFail($id);
+
+        if ($book->available_copies <= 0) {
+            return back()->withErrors(['This book is not available']);
+        }
+
+        Loan::create([
+            'user_id' => Auth::id(),
+            'book_id' => $id,
+            'due_date' => now()->addDays(14),
         ]);
 
-        Book::create($request->all());
-        return redirect()->route('books.index')->with('success', 'Book added successfully.');
+        $book->decrement('available_copies');
+
+        return back()->with('success', 'Book borrowed successfully!');
     }
-
-    public function edit(Book $book)
-    {
-        return view('books.edit', compact('book'));
-    }
-
-    public function update(Request $request, Book $book)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'genre' => 'nullable|string|max:255',
-            'available_copies' => 'required|integer|min:1',
-        ]);
-
-        $book->update($request->all());
-        return redirect()->route('books.index')->with('success', 'Book updated successfully.');
-    }
-
-    public function destroy(Book $book)
-    {
-        $book->delete();
-        return redirect()->route('books.index')->with('success', 'Book deleted successfully.');
-    }
-
-    public function borrow($id)
-{
-    $book = Book::findOrFail($id);
-
-    // Check if the user already borrowed max books
-    $user = auth()->user();
-    if ($user->loans->count() >= 2) {
-        return back()->with('error', 'You have reached the maximum number of borrowed books.');
-    }
-
-    // Create new loan
-    Loan::create([
-        'user_id' => $user->id,
-        'book_id' => $book->id,
-        'due_date' => now()->addWeek(),
-    ]);
-
-    return back()->with('success', 'Book borrowed successfully!');
 }
-
-}
-
-
-

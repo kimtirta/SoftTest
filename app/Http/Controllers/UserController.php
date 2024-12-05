@@ -4,51 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use App\Models\Loan;
 
 class UserController extends Controller
 {
-    public function loginForm()
+    public function login()
     {
         return view('user.login');
     }
 
-    public function login(Request $request)
+    public function loginSubmit(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $credentials = $request->only('email', 'password');
 
-        if (auth()->attempt($request->only('email', 'password'))) {
+        if (Auth::attempt($credentials)) {
             return redirect()->route('user.dashboard');
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials.']);
-    }
-
-    public function logout()
-    {
-        auth()->logout();
-        return redirect()->route('user.login');
+        return back()->withErrors(['Invalid credentials']);
     }
 
     public function dashboard()
-{
-    if (!auth()->check()) {
-        return redirect()->route('user.login');
+    {
+        $loans = Loan::with('book')
+            ->where('user_id', Auth::id())
+            ->get();
+
+        return view('user.dashboard', ['loans' => $loans]);
     }
-
-    // Mendapatkan pinjaman dari user yang sedang login
-    $loans = auth()->user()->loans;
-
-    return view('user.dashboard', compact('loans'));
 }
-public function index()
-{
-    // Your logic here
-    return view('books.index');
-}
-
-}
-

@@ -1,54 +1,44 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Book;
-use App\Models\User;
-use App\Models\Loan;
 use Illuminate\Http\Request;
-use App\Models\Admin;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Loan;
+use App\Models\User;
+use App\Models\Book;
 
 class AdminController extends Controller
 {
-    public function loginForm()
+    public function login()
     {
         return view('admin.login');
     }
 
-    public function login(Request $request)
+    public function loginSubmit(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $credentials = $request->only('email', 'password');
 
-        $admin = Admin::where('email', $request->email)->first();
-
-        if ($admin && \Hash::check($request->password, $admin->password)) {
-            session(['admin' => $admin->id]);
+        if (Auth::guard('admin')->attempt($credentials)) {
             return redirect()->route('admin.dashboard');
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials.']);
-    }
-
-    public function logout()
-    {
-        session()->forget('admin');
-        return redirect()->route('admin.login');
+        return back()->withErrors(['Invalid credentials']);
     }
 
     public function dashboard()
-    {
-        $books = Book::all();
-        $users = User::all();
-        $loans = Loan::all();
+{
+    $users = User::all(); // Get all users
+    $books = Book::all(); // Get all books
+    $loans = Loan::whereNull('returned_date')->get(); // Get active loans
 
-        if (!session()->has('admin')) {
-            return redirect()->route('admin.login');
-        }
-
-        return view('admin.dashboard', compact('books', 'users', 'loans'));
-    }
+    return view('admin.dashboard', [
+        'users' => $users,
+        'books' => $books,
+        'loans' => $loans,
+        'total_users' => $users->count(),
+        'total_books' => $books->count(),
+        'active_loans' => $loans->count(),
+    ]);
 }
 
+}
