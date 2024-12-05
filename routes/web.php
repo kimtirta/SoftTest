@@ -15,6 +15,9 @@ Route::get('/', function () {
 });
 
 // Admin routes
+Route::resource('books', BookController::class);
+Route::resource('users', UserController::class);
+
 Route::get('/admin/login', [AdminController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'loginSubmit'])->name('admin.login.submit');
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -22,7 +25,9 @@ Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('adm
 // Book routes
 Route::get('/admin/books', [BookController::class, 'index'])->name('books.index');
 Route::post('/admin/books/{id}/borrow', [BookController::class, 'borrow'])->name('user.books.borrow');
-
+Route::prefix('admin')->middleware('auth:admin')->group(function () {
+    Route::resource('books', BookController::class);  // This handles CRUD operations
+});
 // Loan routes
 Route::get('/admin/loans', [LoanController::class, 'index'])->name('admin.loans.index');
 Route::post('/admin/loans/{id}/return', [LoanController::class, 'markAsReturned'])->name('loans.return');

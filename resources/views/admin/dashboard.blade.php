@@ -7,13 +7,13 @@
     <div class="p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold">Total Users</h2>
         <p class="text-3xl font-bold">{{ $total_users }}</p> <!-- Use the total_users variable -->
-        <a href="{{ route('user.dashboard') }}" class="text-blue-500 mt-2 inline-block">Manage Users</a>
+        <a href="{{ route('users.index') }}" class="text-blue-500 mt-2 inline-block">Manage Users</a> <!-- Updated the route -->
     </div>
     <div class="p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold">Total Books</h2>
         <p class="text-3xl font-bold">{{ $books->count() }}</p>
         <a href="{{ route('books.index') }}" class="text-blue-500 mt-2 inline-block">Manage Books</a>
-    </div>
+        </div>
     <div class="p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold">Active Loans</h2>
         <p class="text-3xl font-bold">{{ $loans->count() }}</p>

@@ -13,7 +13,7 @@ class BookController extends Controller
     {
         $books = Book::paginate(10);
 
-        return view('books.index', ['books' => $books]);
+        return view('admin.books.index', ['books' => $books]);
     }
 
     public function indexForUsers()
@@ -41,4 +41,71 @@ class BookController extends Controller
 
         return back()->with('success', 'Book borrowed successfully!');
     }
+// Show the form for creating a new book
+public function create()
+{
+    return view('admin.books.create');
+}
+
+// Store a newly created book
+public function store(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'author' => 'required|string|max:255',
+        'genre' => 'nullable|string|max:255',
+        'synopsis' => 'nullable|string',
+        'available_copies' => 'required|integer|min:0',
+    ]);
+
+    Book::create([
+        'title' => $request->title,
+        'author' => $request->author,
+        'genre' => $request->genre,
+        'synopsis' => $request->synopsis,
+        'available_copies' => $request->available_copies,
+    ]);
+
+    return redirect()->route('books.index')->with('success', 'Book added successfully');
+}
+
+public function edit($id)
+{
+    $book = Book::findOrFail($id);
+    return view('admin.books.edit', compact('book'));
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'author' => 'required|string|max:255',
+        'genre' => 'nullable|string|max:255',
+        'synopsis' => 'nullable|string',
+        'available_copies' => 'required|integer|min:0',
+    ]);
+
+    $book = Book::findOrFail($id);
+    $book->update([
+        'title' => $request->title,
+        'author' => $request->author,
+        'genre' => $request->genre,
+        'synopsis' => $request->synopsis,
+        'available_copies' => $request->available_copies,
+    ]);
+
+    return redirect()->route('books.index')->with('success', 'Book updated successfully.');
+}
+
+
+// Remove the specified book
+public function destroy($id)
+{
+    $book = Book::findOrFail($id);
+    $book->delete();
+
+    return redirect()->route('books.index')->with('success', 'Book deleted successfully.');
+}
+
+
 }
