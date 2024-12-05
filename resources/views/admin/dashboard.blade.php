@@ -17,7 +17,7 @@
     <div class="p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold">Active Loans</h2>
         <p class="text-3xl font-bold">{{ $loans->count() }}</p>
-        <a href="{{ route('admin.loans.index') }}" class="text-blue-500 mt-2 inline-block">View All Loans</a>
+        <a href="{{ route('loans.index') }}" class="text-blue-500 mt-2 inline-block">View All Loans</a>
     </div>
 </div>
 

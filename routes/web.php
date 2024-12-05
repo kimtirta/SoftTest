@@ -31,6 +31,9 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 // Loan routes
 Route::get('/admin/loans', [LoanController::class, 'index'])->name('admin.loans.index');
 Route::post('/admin/loans/{id}/return', [LoanController::class, 'markAsReturned'])->name('loans.return');
+// Route::prefix('admin')->middleware('auth', 'can:admin')->group(function () {
+//     Route::resource('loans', LoanController::class);
+// });
 
 // Transaction routes
 Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('transactions.index');
@@ -41,3 +44,4 @@ Route::get('/user/login', [UserController::class, 'login'])->name('user.login');
 Route::post('/user/login', [UserController::class, 'loginSubmit'])->name('user.login.submit');
 Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 Route::get('/user/books', [BookController::class, 'indexForUsers'])->name('user.books.index');
+
