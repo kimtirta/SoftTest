@@ -1,37 +1,33 @@
 @extends('layouts.app')
 
-@section('title', 'Add New Loan')
+@section('title', 'Create Loan')
 
 @section('content')
+<h1>Create Loan</h1>
 <form action="{{ route('admin.loans.store') }}" method="POST">
     @csrf
-    <div class="mb-4">
-        <label for="user_id" class="block text-gray-700">User</label>
-        <select name="user_id" id="user_id" class="mt-1 block w-full" required>
-            <option value="">Select User</option>
+    <div class="form-group">
+        <label for="user_id">User</label>
+        <select name="user_id" id="user_id" class="form-control" required>
+            <option value="">Select a User</option>
             @foreach($users as $user)
-                <option value="{{ $user->id }}">{{ $user->name }}</option>
+            <option value="{{ $user->id }}">{{ $user->name }}</option>
             @endforeach
         </select>
     </div>
-
-    <div class="mb-4">
-        <label for="book_id" class="block text-gray-700">Book</label>
-        <select name="book_id" id="book_id" class="mt-1 block w-full" required>
-            <option value="">Select Book</option>
+    <div class="form-group">
+        <label for="book_id">Book</label>
+        <select name="book_id" id="book_id" class="form-control" required>
+            <option value="">Select a Book</option>
             @foreach($books as $book)
-                <option value="{{ $book->id }}">{{ $book->title }}</option>
+            <option value="{{ $book->id }}">{{ $book->title }}</option>
             @endforeach
         </select>
     </div>
-
-    <div class="mb-4">
-        <label for="due_date" class="block text-gray-700">Due Date</label>
-        <input type="date" name="due_date" id="due_date" class="mt-1 block w-full" required>
+    <div class="form-group">
+        <label for="due_date">Due Date</label>
+        <input type="date" name="due_date" id="due_date" class="form-control" required>
     </div>
-
-    <div class="mb-4">
-        <button type="submit" class="btn btn-primary">Save Loan</button>
-    </div>
+    <button type="submit" class="btn btn-success">Create</button>
 </form>
 @endsection

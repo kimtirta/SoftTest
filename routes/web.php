@@ -14,6 +14,9 @@ Route::get('/', function () {
     return view('admin.login'); // Mengarah ke file home.blade.php
 });
 
+
+Route::resource('loans', LoanController::class);
+
 // Admin routes
 Route::resource('books', BookController::class);
 Route::resource('users', UserController::class);
@@ -31,9 +34,9 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 // Loan routes
 Route::get('/admin/loans', [LoanController::class, 'index'])->name('admin.loans.index');
 Route::post('/admin/loans/{id}/return', [LoanController::class, 'markAsReturned'])->name('loans.return');
-// Route::prefix('admin')->middleware('auth', 'can:admin')->group(function () {
-//     Route::resource('loans', LoanController::class);
-// });
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::resource('loans', LoanController::class);
+});
 
 // Transaction routes
 Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('transactions.index');
