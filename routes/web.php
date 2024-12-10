@@ -20,9 +20,13 @@ Route::get('/', function () {
 Route::resource('books', BookController::class);
 Route::resource('users', UserController::class);
 
+Route::prefix('admin/loans')->group(function () {
+    Route::get('/not-returned', [AdminLoanController::class, 'notReturned'])->name('admin.loans.notReturned');
+    Route::get('/returned', [AdminLoanController::class, 'index'])->name('admin.loans.returned');
+    Route::get('/overdue', [AdminLoanController::class, 'overdue'])->name('admin.loans.overdue');
+});
 Route::resource('admin/loans', AdminLoanController::class);
-
-
+Route::get('admin/loans/returned', [AdminLoanController::class, 'returned'])->name('admin.loans.returned');
 
 Route::get('loans', [UserLoanController::class, 'index'])->name('users.loans.index');
 Route::get('admin/loans', [AdminLoanController::class, 'index'])->name('admin.loans.index');
@@ -41,7 +45,9 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::resource('books', BookController::class);  // This handles CRUD operations
 });
 // Loan routes
-
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('loans', AdminLoanController::class);
+});
 // Transaction routes
 Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 Route::post('/admin/transactions/{id}/pay', [TransactionController::class, 'markAsPaid'])->name('transactions.markAsPaid');
