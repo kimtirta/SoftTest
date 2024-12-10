@@ -47,14 +47,12 @@
                         @endif
                     </td>
                     <td class="py-2 px-4">
-                        <a href="{{ route('admin.loans.return', $loan->id) }}" class="text-blue-500 mr-2">Mark as Returned</a>
-                        <a href="{{ route('admin.loans.edit', $loan->id) }}" class="text-blue-500 mr-2">Edit</a>
-                        <form action="{{ route('admin.loans.destroy', $loan->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500">Delete</button>
-                        </form>
-                    </td>
+    <form action="{{ route('admin.loans.return', $loan->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to mark this loan as returned?');">
+        @csrf
+        <button type="submit" class="text-blue-500">Mark as Returned</button>
+    </form>
+</td>
+
                 </tr>
             @endforeach
         </tbody>

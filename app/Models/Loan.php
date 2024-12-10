@@ -16,6 +16,10 @@ class Loan extends Model
         'due_date',
         'returned_date',
     ];
+    protected $casts = [
+        'due_date' => 'datetime',
+        'returned_date' => 'datetime',
+    ];
 
     public function user()
     {

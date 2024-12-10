@@ -28,7 +28,7 @@ Route::get('loans', [UserLoanController::class, 'index'])->name('users.loans.ind
 Route::get('admin/loans', [AdminLoanController::class, 'index'])->name('admin.loans.index');
 Route::get('admin/loans/create', [AdminLoanController::class, 'create'])->name('admin.loans.create');
 Route::get('admin/loans/{loan}/edit', [AdminLoanController::class, 'edit'])->name('admin.loans.edit');
-
+Route::post('admin/loans/{loan}/return', [AdminLoanController::class, 'markAsReturned'])->name('admin.loans.return');
 
 Route::get('/admin/login', [AdminController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'loginSubmit'])->name('admin.login.submit');

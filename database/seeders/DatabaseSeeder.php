@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
 
         // Books
         Book::factory(50)->create();
+
+        \App\Models\Loan::factory(50)->create();
+
     }
 }
 

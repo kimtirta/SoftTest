@@ -113,6 +113,17 @@ class AdminLoanController extends Controller
 
       return redirect()->route('admin.loans.index')->with('success', 'Loan deleted successfully.');
   }
+  public function markAsReturned($loanId)
+  {
+      // Find the loan by ID
+      $loan = Loan::findOrFail($loanId);
 
+      // Mark the loan as returned by updating the `returned_date`
+      $loan->returned_date = now();
+      $loan->save();
+
+      // Redirect back to the loans list with a success message
+      return redirect()->route('admin.loans.index')->with('success', 'Loan marked as returned.');
+  }
 
 }
