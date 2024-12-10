@@ -4,12 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Loan extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'book_id', 'due_date', 'returned_date'];
+    protected $fillable = [
+        'user_id',
+        'book_id',
+        'due_date',
+        'returned_date',
+    ];
 
     public function user()
     {
@@ -25,10 +31,4 @@ class Loan extends Model
     {
         return $this->hasOne(Transaction::class);
     }
-    
-    public function getIsOverdueAttribute()
-    {
-        return !$this->returned_date && now()->greaterThan($this->due_date);
-    }
 }
-

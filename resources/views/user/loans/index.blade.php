@@ -1,39 +1,68 @@
 @extends('layouts.app')
 
+@section('title', 'My Loans')
+
 @section('content')
-<div class="container">
-    <h3 class="mb-4">Borrowed Books</h3>
-    <table class="table table-bordered">
-        <thead>
+<div class="container mt-4">
+    <h1 class="text-center">My Loans</h1>
+    
+    <h3 class="mt-4">Active Loans</h3>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
             <tr>
-                <th>#</th>
-                <th>Book Title</th>
-                <th>Author</th>
-                <th>Borrower</th>
+                <th>Book</th>
                 <th>Due Date</th>
-                <th>Returned Date</th>
-                <th>Action</th>
+                <th>Fine Amount</th>
+                <th>Request Return</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($loans as $loan)
+            @forelse($activeLoans as $loan)
             <tr>
-                <td>{{ $loop->iteration }}</td>
                 <td>{{ $loan->book->title }}</td>
-                <td>{{ $loan->book->author }}</td>
-                <td>{{ $loan->user->name }}</td>
                 <td>{{ $loan->due_date }}</td>
-                <td>{{ $loan->returned_date ?? 'Not Returned' }}</td>
+                <td>{{ $loan->transaction->fine_amount }}</td>
                 <td>
-                    @if (!$loan->returned_date)
-                    <form action="{{ route('loans.return', $loan->id) }}" method="POST">
+                    <form action="{{ route('users.loans.returnRequest', $loan->id) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success btn-sm">Mark as Returned</button>
+                        <button class="btn btn-warning btn-sm">Request Return</button>
                     </form>
-                    @endif
                 </td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="4" class="text-center">No active loans</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <!-- Past Loans Section -->
+    <h3 class="mt-4">Past Loans</h3>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Book</th>
+                <th>Due Date</th>
+                <th>Returned Date</th>
+                <th>Fine Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($pastLoans as $loan)
+            <tr>
+                <td>{{ $loan->book->title }}</td>
+                <td>{{ $loan->due_date }}</td>
+                <td>{{ $loan->returned_date }}</td>
+                <td>{{ $loan->transaction->fine_amount }}</td>
+                <td>{{ $loan->transaction->paid ? 'Paid' : 'Unpaid' }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="5" class="text-center">No past loans</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>

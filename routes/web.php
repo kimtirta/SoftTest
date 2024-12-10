@@ -6,17 +6,29 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\UserLoanController;
+use App\Http\Controllers\AdminLoanController;
+use App\Models\Admin;
+// Admin routes
 
 
 // Rute untuk Admin
 Route::get('/', function () {
     return view('admin.login'); // Mengarah ke file home.blade.php
 });
-
 // Admin routes
 Route::resource('books', BookController::class);
 Route::resource('users', UserController::class);
+
+Route::resource('admin/loans', AdminLoanController::class);
+
+
+
+Route::get('loans', [UserLoanController::class, 'index'])->name('users.loans.index');
+Route::get('admin/loans', [AdminLoanController::class, 'index'])->name('admin.loans.index');
+Route::get('admin/loans/create', [AdminLoanController::class, 'create'])->name('admin.loans.create');
+Route::get('admin/loans/{loan}/edit', [AdminLoanController::class, 'edit'])->name('admin.loans.edit');
+
 
 Route::get('/admin/login', [AdminController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'loginSubmit'])->name('admin.login.submit');
@@ -29,11 +41,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::resource('books', BookController::class);  // This handles CRUD operations
 });
 // Loan routes
-Route::get('/admin/loans', [LoanController::class, 'index'])->name('admin.loans.index');
-Route::post('/admin/loans/{id}/return', [LoanController::class, 'markAsReturned'])->name('loans.return');
-// Route::prefix('admin')->middleware('auth', 'can:admin')->group(function () {
-//     Route::resource('loans', LoanController::class);
-// });
 
 // Transaction routes
 Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('transactions.index');

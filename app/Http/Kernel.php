@@ -6,6 +6,22 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
+    protected function schedule(Schedule $schedule)
+{
+    $schedule->call(function () {
+        $transactions = \App\Models\Transaction::with('loan')->get();
+
+        foreach ($transactions as $transaction) {
+            $loan = $transaction->loan;
+            if ($loan->due_date < now() && !$transaction->paid) {
+                $overdueDays = now()->diffInDays($loan->due_date);
+                $transaction->fine_amount = $overdueDays * 5000;
+                $transaction->save();
+            }
+        }
+    })->daily();
+}
+
     /**
      * The application's global HTTP middleware stack.
      *
