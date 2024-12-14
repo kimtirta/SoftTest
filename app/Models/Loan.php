@@ -31,8 +31,8 @@ class Loan extends Model
         return $this->belongsTo(Book::class);
     }
 
-    public function transaction()
-    {
-        return $this->hasOne(Transaction::class);
-    }
+public function transaction()
+{
+    return $this->hasOne(Transaction::class, 'loan_id');
+}
 }

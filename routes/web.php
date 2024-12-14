@@ -27,9 +27,13 @@ Route::prefix('admin/loans')->group(function () {
 });
 Route::resource('admin/loans', AdminLoanController::class);
 Route::get('admin/loans/returned', [AdminLoanController::class, 'returned'])->name('admin.loans.returned');
+// routes/web.php
+
+Route::post('/admin/loans/{id}/return', [AdminLoanController::class, 'markAsReturned'])->name('admin.loans.return');
+Route::post('/admin/loans/{id}/paid', [AdminLoanController::class, 'markAsPaid'])->name('admin.loans.paid');
 
 Route::get('loans', [UserLoanController::class, 'index'])->name('users.loans.index');
-Route::get('admin/loans', [AdminLoanController::class, 'index'])->name('admin.loans.index');
+Route::get('admin/loans', [AdminLoanController::class, 'markAsReturned'])->name('admin.loans.index');
 Route::get('admin/loans/create', [AdminLoanController::class, 'create'])->name('admin.loans.create');
 Route::get('admin/loans/{loan}/edit', [AdminLoanController::class, 'edit'])->name('admin.loans.edit');
 Route::post('admin/loans/{loan}/return', [AdminLoanController::class, 'markAsReturned'])->name('admin.loans.return');
@@ -55,6 +59,6 @@ Route::post('/admin/transactions/{id}/pay', [TransactionController::class, 'mark
 // User routes
 Route::get('/user/login', [UserController::class, 'login'])->name('user.login');
 Route::post('/user/login', [UserController::class, 'loginSubmit'])->name('user.login.submit');
-Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+Route::get('/user/dashboard', [BookController::class, 'indexForUsers'])->name('user.dashboard');
 Route::get('/user/books', [BookController::class, 'indexForUsers'])->name('user.books.index');
 

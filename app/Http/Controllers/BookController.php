@@ -18,10 +18,19 @@ class BookController extends Controller
 
     public function indexForUsers()
     {
+        $user = auth()->user();
+    
+        // Load user loans with relationships
+        $loans = $user->loans()->with(['book', 'transaction'])->get();
+    
+        // Load paginated books for browsing
         $books = Book::paginate(10);
-
-        return view('books.index', ['books' => $books]);
+    
+        // Pass the data to the dashboard view
+        return view('user.dashboard', compact('loans', 'books'));
     }
+    
+
 
     public function borrow(Request $request, $id)
     {

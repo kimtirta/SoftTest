@@ -26,19 +26,23 @@ class AdminController extends Controller
     }
 
     public function dashboard()
-{
-    $users = User::all(); // Get all users
-    $books = Book::all(); // Get all books
-    $loans = Loan::whereNull('returned_date')->get(); // Get active loans
-
-    return view('admin.dashboard', [
-        'users' => $users,
-        'books' => $books,
-        'loans' => $loans,
-        'total_users' => $users->count(),
-        'total_books' => $books->count(),
-        'active_loans' => $loans->count(),
-    ]);
-}
+    {
+        $total_users = User::count();
+        $total_books = Book::count();
+        $active_loans = Loan::whereNull('returned_date')->count();
+    
+        // Fetch the 10 newest loans ordered by creation date
+        $recent_loans = Loan::with(['user', 'book'])
+                            ->orderBy('created_at', 'desc')
+                            ->take(10)
+                            ->get();
+    
+        return view('admin.dashboard', [
+            'total_users' => $total_users,
+            'books' => Book::all(),
+            'loans' => $recent_loans, // Pass the limited loans
+        ]);
+    }
+    
 
 }

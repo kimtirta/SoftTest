@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use App\Models\Loan;
 use App\Models\User;
 use App\Models\Book;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 class AdminLoanController extends Controller
@@ -22,21 +23,23 @@ class AdminLoanController extends Controller
     }
 
     public function index()
-    {
-        // Fetch all active loans (not returned yet)
-        $loans = Loan::with(['user', 'book'])
-            ->whereNull('returned_date')
-            ->paginate(10);
-        
-        // Fetch all past loans (returned loans)
-        $pastLoans = Loan::with(['user', 'book'])
-            ->whereNotNull('returned_date')
-            ->paginate(10);
-    
-        // Return the view with both active and past loans
-        return view('admin.loans.index', compact('loans', 'pastLoans'));
-    }
-    
+{
+    // Fetch all loans ordered by creation date, newest first
+    $loans = Loan::with(['user', 'book'])
+        ->orderBy('created_at', 'desc')
+        ->paginate(10); // Paginate with 10 loans per page
+
+    return view('admin.loans.index', compact('loans'));
+}
+public function markAsPaid($id)
+{
+    $transaction = Transaction::where('loan_id', $id)->firstOrFail();
+    $transaction->paid = true;
+    $transaction->save();
+
+    return redirect()->back()->with('success', 'Fine marked as paid.');
+}
+
 // app/Http/Controllers/LoanController.php
 
 public function returned()
@@ -116,23 +119,39 @@ public function returned()
 
   public function update(Request $request, $id)
 {
-    $loan = Loan::findOrFail($id);
+    $request->validate([
+        'user_id' => 'required|exists:users,id',
+        'book_id' => 'required|exists:books,id',
+        'due_date' => 'required|date',
+        'returned_status' => 'required',
+        'returned_date' => 'nullable|date',
+        'fine_amount' => 'required|numeric|min:0',
+        'paid' => 'required|boolean',
+    ]);
 
-    // Update loan details
+    // Update Loan
+    $loan = Loan::findOrFail($id);
     $loan->user_id = $request->user_id;
     $loan->book_id = $request->book_id;
     $loan->due_date = $request->due_date;
 
-    // Handle returned_date logic
     if ($request->returned_status === 'returned') {
-        $loan->returned_date = $request->returned_date;
+        $loan->returned_date = $request->returned_date ?? Carbon::now();
     } else {
-        $loan->returned_date = null; // Set to null if not returned
+        $loan->returned_date = null;
     }
-
     $loan->save();
 
-    return redirect()->route('admin.loans.index')->with('success', 'Loan updated successfully');
+    // Update or Create Transaction
+    Transaction::updateOrCreate(
+        ['loan_id' => $loan->id],
+        [
+            'fine_amount' => $request->fine_amount,
+            'paid' => $request->paid,
+        ]
+    );
+
+    return redirect()->route('admin.loans.index')->with('success', 'Loan and transaction updated successfully.');
 }
 
   // Delete a loan
