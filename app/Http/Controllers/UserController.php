@@ -26,6 +26,11 @@ class UserController extends Controller
 
     return back()->withErrors(['email' => 'Invalid credentials']);
 }
+public function showLoginForm()
+{
+    return view('user.login');
+}
+
 
 
     public function dashboard()

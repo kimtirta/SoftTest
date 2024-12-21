@@ -61,10 +61,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::get('/admin/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 Route::post('/admin/transactions/{id}/pay', [TransactionController::class, 'markAsPaid'])->name('transactions.markAsPaid');
 
-// User routes
-Route::get('/user/login', [UserController::class, 'login'])->name('user.login');
 Route::post('/user/login', [UserController::class, 'loginSubmit'])->name('user.login.submit');
-Route::get('/user/dashboard', [BookController::class, 'indexForUsers'])->name('user.dashboard');
-Route::get('/user/books', [BookController::class, 'indexForUsers'])->name('user.books.index');
-
+Route::get('/user/login', [UserController::class, 'showLoginForm'])->name('user.login');
 
