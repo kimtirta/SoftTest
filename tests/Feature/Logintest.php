@@ -53,7 +53,7 @@ class LoginTest extends TestCase
             'email' => $email,
             'password' => $password
         ];
-
+      
         // Validate input before making the request
         $validator = Validator::make($credentials, $this->loginRules, $this->loginMessages);
         $this->assertEquals(!$validator->fails(), $isValid);
@@ -90,34 +90,46 @@ class LoginTest extends TestCase
         return [
             // Valid email and password
             ['validemail@example.com', 'ValidPassword123', true],
-            
-            // Invalid email formats (Partition Testing - Invalid Email)
+
+            // Invalid email formats
             ['invalid-email.com', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
             ['', 'ValidPassword123', false, ['Email harus diisi.']],
             ['@example.com', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
 
-            // Valid and invalid passwords (Boundary Testing for Password Length)
-            ['validemail@example.com', 'aaa', false, ['Password minimal 8 karakter.']],  // Invalid password - too short
-            ['validemail@example.com', str_repeat('a', 256), false, ['Password maksimal 60 karakter.']],  // Invalid password - too long
-            ['validemail@example.com', '', false, ['Password harus diisi.']],  // Missing password
-            
-            // Boundary testing for password length (Boundary Testing)
-            ['validemail@example.com', 'aaaaa', false, ['Password minimal 8 karakter.']], // Just below valid password length
-            ['validemail@example.com', str_repeat('a', 60), true],  // Exactly the maximum allowed password length
-            ['validemail@example.com', str_repeat('a', 61), false, ['Password maksimal 60 karakter.']],  // Just above valid password length
+            // Valid and invalid passwords
+            ['validemail@example.com', 'aaa', false, ['Password minimal 8 karakter.']],
+            ['validemail@example.com', str_repeat('a', 256), false, ['Password maksimal 60 karakter.']],
+            ['validemail@example.com', '', false, ['Password harus diisi.']],
 
-            // Testing with email close to max length (Boundary Testing for Email Length)
-            [str_repeat('a', 244) . '@domain.com', 'ValidPassword123', true],  // Max length email (255 characters including @domain.com)
-            ['a' . str_repeat('a', 244) . '@domain.com', 'ValidPassword123', false, ['Email tidak boleh lebih dari 255 karakter.']],  // Invalid email, 256 characters
+            // Emails with Chinese characters
+            ['测试@例子.公司', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
+            ['user@例子.com', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
 
-            // Boundary testing for empty inputs
-            ['', '', false, ['Email harus diisi.', 'Password harus diisi.']],  // Both fields empty
+            // Emails with emojis
+            ['user😊@example.com', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
+            ['😊user@example.com', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
 
-            // Testing with valid but non-existent credentials (Boundary Testing for Authentication)
-            ['nonexistent@example.com', 'ValidPassword123', false, ['These credentials do not match our records.']],  // Non-existent user
+            // Emails with invalid domain
+            ['user@example', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
+            ['user@.com', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
 
-            // Testing with email that doesn't match registered password (Partition Testing - Invalid Credentials)
-            ['validemail@example.com', 'WrongPassword123', false, ['These credentials do not match our records.']],  // Incorrect password
+            // Emails with unusual characters
+            ['user.name+tag+sorting@example.com', 'ValidPassword123', true],
+            ['user/name=tag+sorting@example.com', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
+            ['user@[IPv6:2001:db8::1]', 'ValidPassword123', false, ['Email harus dalam format yang benar.']],
+
+            // Testing email near the max length
+            [str_repeat('a', 244) . '@domain.com', 'ValidPassword123', true],
+            [str_repeat('a', 245) . '@domain.com', 'ValidPassword123', false, ['Email tidak boleh lebih dari 255 karakter.']],
+
+            // Both fields empty
+            ['', '', false, ['Email harus diisi.', 'Password harus diisi.']],
+
+            // Non-existent user
+            ['nonexistent@example.com', 'ValidPassword123', false, ['These credentials do not match our records.']],
+
+            // Incorrect password
+            ['validemail@example.com', 'WrongPassword123', false, ['These credentials do not match our records.']],
         ];
     }
 
@@ -137,7 +149,7 @@ class LoginTest extends TestCase
             'email' => $email,
             'password' => $password
         ];
-
+      
         // Validate input before making the request
         $validator = Validator::make($credentials, $this->loginRules, $this->loginMessages);
         $this->assertEquals(!$validator->fails(), $isValid);
