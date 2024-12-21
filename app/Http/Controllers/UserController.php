@@ -10,21 +10,23 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function login()
-    {
-        return view('user.login');
-    }
-
     public function loginSubmit(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
+{
+    // Validate the request
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:6', // Adjust min length based on your requirements
+    ]);
 
-        if (Auth::attempt($credentials)) {
-            return redirect()->route('user.dashboard');
-        }
+    $credentials = $request->only('email', 'password');
 
-        return back()->withErrors(['Invalid credentials']);
+    if (Auth::attempt($credentials)) {
+        return redirect()->route('user.dashboard');
     }
+
+    return back()->withErrors(['email' => 'Invalid credentials']);
+}
+
 
     public function dashboard()
     {

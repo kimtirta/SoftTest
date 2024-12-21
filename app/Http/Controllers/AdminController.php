@@ -15,15 +15,20 @@ class AdminController extends Controller
     }
 
     public function loginSubmit(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:6',
+    ]);
 
-        if (Auth::guard('admin')->attempt($credentials)) {
-            return redirect()->route('admin.dashboard');
-        }
+    $credentials = $request->only('email', 'password');
 
-        return back()->withErrors(['Invalid credentials']);
+    if (Auth::guard('admin')->attempt($credentials)) {
+        return redirect()->route('admin.dashboard');
     }
+
+    return back()->withErrors(['email' => 'Invalid credentials']);
+}
 
     public function dashboard()
     {
