@@ -15,10 +15,10 @@ class LoanFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => User::inRandomOrder()->first()->id,
-            'book_id' => Book::inRandomOrder()->first()->id,
-            'due_date' => Carbon::now()->addDays(rand(7, 30)),
-            'returned_date' => null, // You can randomly make it returned too
+            'user_id' => User::factory(),
+            'book_id' => Book::factory(),
+            'due_date' => $this->faker->dateTimeBetween('+1 week', '+2 weeks'),
+            'returned_date' => null, // Default value for new loans
         ];
     }
 }

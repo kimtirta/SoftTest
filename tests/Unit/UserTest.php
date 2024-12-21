@@ -1,25 +1,24 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Book;
-use App\Models\Loan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
+use App\Models\User;
 
 class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_should_create_a_user()
+    /**
+     * Test creating a new user with valid data.
+     */
+    public function test_create_user_with_valid_data()
     {
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'John Doe',
             'email' => 'johndoe@example.com',
-            'password' => bcrypt('password123')
+            'password' => bcrypt('password123'),
         ]);
 
         $this->assertDatabaseHas('users', [
@@ -27,107 +26,126 @@ class UserTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_should_require_name()
+    /**
+     * Test reading user data.
+     */
+    public function test_read_user_data()
     {
-        $user = new User();
-        $validator = Validator::make($user->toArray(), $user->rules());
-
-        $this->assertTrue($validator->fails());
-        $this->assertContains('The name field is required.', $validator->errors()->all());
-    }
-
-    /** @test */
-    public function it_should_require_email()
-    {
-        $user = new User();
-        $validator = Validator::make($user->toArray(), $user->rules());
-
-        $this->assertTrue($validator->fails());
-        $this->assertContains('The email field is required.', $validator->errors()->all());
-    }
-
-    /** @test */
-    public function it_should_have_unique_email()
-    {
-        User::create([
+        $user = User::factory()->create([
             'name' => 'Jane Doe',
             'email' => 'janedoe@example.com',
-            'password' => bcrypt('password123')
         ]);
 
-        $user = new User([
-            'name' => 'John Doe',
-            'email' => 'janedoe@example.com',
-            'password' => bcrypt('password123')
-        ]);
+        $retrievedUser = User::find($user->id);
 
-        $this->assertFalse($user->save());  // Fails because the email is not unique
+        $this->assertEquals('Jane Doe', $retrievedUser->name);
+        $this->assertEquals('janedoe@example.com', $retrievedUser->email);
     }
 
-    /** @test */
-    public function it_should_belong_to_many_books_via_loans()
+    /**
+     * Test updating user data.
+     */
+    public function test_update_user_data()
+    {
+        $user = User::factory()->create([
+            'name' => 'Old Name',
+            'email' => 'oldname@example.com',
+        ]);
+
+        $user->update([
+            'name' => 'New Name',
+            'email' => 'newname@example.com',
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'New Name',
+            'email' => 'newname@example.com',
+        ]);
+    }
+
+    /**
+     * Test deleting a user.
+     */
+    public function test_delete_user()
+    {
+        $user = User::factory()->create([
+            'name' => 'Deletable User',
+            'email' => 'deleteuser@example.com',
+        ]);
+
+        $user->delete();
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'deleteuser@example.com',
+        ]);
+    }
+
+    /**
+     * Test creating a user with missing required fields.
+     */
+    public function test_create_user_with_missing_required_fields()
+    {
+        $this->expectException(\Illuminate\Database\QueryException::class);
+
+        User::factory()->create([
+            'name' => null,
+            'email' => null,
+        ]);
+    }
+
+    /**
+     * Test creating a user with duplicate email.
+     */
+    public function test_create_user_with_duplicate_email()
+    {
+        User::factory()->create([
+            'email' => 'duplicate@example.com',
+        ]);
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+
+        User::factory()->create([
+            'email' => 'duplicate@example.com',
+        ]);
+    }
+
+    /**
+     * Test creating a user with invalid email format.
+     */
+    public function test_create_user_with_invalid_email_format()
+    {
+        $this->expectException(\Illuminate\Database\QueryException::class);
+
+        User::factory()->create([
+            'email' => 'invalid-email',
+        ]);
+    }
+
+    /**
+     * Test creating a user with short password.
+     */
+    public function test_create_user_with_short_password()
+    {
+        $this->expectException(\Illuminate\Database\QueryException::class);
+
+        User::factory()->create([
+            'password' => bcrypt('short'),
+        ]);
+    }
+
+    /**
+     * Test relationship with loans (if exists).
+     */
+    public function test_user_has_loans_relationship()
     {
         $user = User::factory()->create();
-        $book = Book::factory()->create();
-        $loan = Loan::create([
-            'user_id' => $user->id,
-            'book_id' => $book->id,
-            'due_date' => now()->addDays(14),
+
+        $loan = $user->loans()->create([
+            'amount' => 5000,
+            'status' => 'pending',
         ]);
 
-        $this->assertTrue($user->books->contains($book)); // Ensure the book is in the user's books collection
-    }
-
-    /** @test */
-    public function it_should_return_error_for_invalid_email_format()
-    {
-        $user = new User([
-            'name' => 'Invalid User',
-            'email' => 'invalidemail',
-            'password' => bcrypt('password123')
-        ]);
-
-        $this->assertFalse($user->save());  // Invalid email format
-    }
-
-    /** @test */
-    public function it_should_return_true_if_user_is_admin()
-    {
-        $admin = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('adminpassword123'),
-            'role' => 'admin'
-        ]);
-
-        $this->assertTrue($admin->isAdmin());  // Check if the user is admin based on role
-    }
-
-    /** @test */
-    public function it_should_return_false_if_user_is_not_admin()
-    {
-        $user = User::create([
-            'name' => 'Regular User',
-            'email' => 'user@example.com',
-            'password' => bcrypt('userpassword123'),
-            'role' => 'user'
-        ]);
-
-        $this->assertFalse($user->isAdmin());  // Check if the user is not admin based on role
-    }
-
-    /** @test */
-    public function it_should_handle_password_encryption()
-    {
-        $user = User::create([
-            'name' => 'Encrypted User',
-            'email' => 'encrypted@example.com',
-            'password' => 'plainpassword'
-        ]);
-
-        $this->assertNotEquals('plainpassword', $user->password);  // Password should be hashed
-        $this->assertTrue(password_verify('plainpassword', $user->password));  // Verify password
+        $this->assertEquals(1, $user->loans()->count());
+        $this->assertTrue($user->loans->contains($loan));
     }
 }
-

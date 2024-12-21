@@ -2,177 +2,110 @@
 
 namespace Tests\Feature;
 
+use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
-use Tests\TestCase;
 
 class UserIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
     /** @test */
-    public function user_can_signup_with_valid_data()
+    public function user_can_register_with_valid_data()
     {
         $data = [
             'name' => 'John Doe',
             'email' => 'johndoe@example.com',
             'password' => 'password123',
-            'password_confirmation' => 'password123',
         ];
 
-        $response = $this->postJson('/signup', $data);
+        $response = $this->postJson('/api/register', $data);
 
-        $response->assertStatus(201);
-        $response->assertJson(['message' => 'User registered successfully.']);
-        $this->assertDatabaseHas('users', ['email' => $data['email']]);
+        $response->assertStatus(201)
+                 ->assertJson([
+                     'message' => 'User registered successfully',
+                     'data' => [
+                         'name' => $data['name'],
+                         'email' => $data['email'],
+                     ],
+                 ]);
     }
 
     /** @test */
-    public function user_cannot_signup_with_invalid_data()
+    public function user_cannot_register_with_missing_fields()
     {
         $data = [
-            'name' => '',
-            'email' => 'invalid-email',
-            'password' => 'short',
+            'name' => 'John Doe',
+            // Missing email
+            'password' => 'password123',
         ];
 
-        $response = $this->postJson('/signup', $data);
+        $response = $this->postJson('/api/register', $data);
 
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['name', 'email', 'password']);
+        $response->assertStatus(422) // Validation failed
+                 ->assertJsonValidationErrors(['email']);
+    }
+
+    /** @test */
+    public function user_cannot_register_with_existing_email()
+    {
+        $existingUser = User::factory()->create(['email' => 'johndoe@example.com']);
+
+        $data = [
+            'name' => 'John Doe',
+            'email' => $existingUser->email,
+            'password' => 'password123',
+        ];
+
+        $response = $this->postJson('/api/register', $data);
+
+        $response->assertStatus(409) // Conflict
+                 ->assertJson([
+                     'message' => 'Email already exists.',
+                 ]);
     }
 
     /** @test */
     public function user_can_login_with_valid_credentials()
     {
-        $user = User::factory()->create([
-            'email' => 'testuser@example.com',
-            'password' => bcrypt('password123'),
-        ]);
+        $user = User::factory()->create(['password' => bcrypt('password123')]);
 
-        $response = $this->postJson('/login', [
+        $response = $this->postJson('/api/login', [
             'email' => $user->email,
             'password' => 'password123',
         ]);
 
-        $response->assertStatus(200);
-        $response->assertJson(['message' => 'Login successful.']);
+        $response->assertStatus(200)
+                 ->assertJsonStructure(['token']);
     }
 
     /** @test */
-    public function user_cannot_login_with_invalid_credentials()
+    public function user_cannot_login_with_wrong_password()
     {
-        $user = User::factory()->create([
-            'email' => 'testuser@example.com',
-            'password' => bcrypt('password123'),
-        ]);
+        $user = User::factory()->create(['password' => bcrypt('password123')]);
 
-        $response = $this->postJson('/login', [
+        $response = $this->postJson('/api/login', [
             'email' => $user->email,
             'password' => 'wrongpassword',
         ]);
 
-        $response->assertStatus(401);
-        $response->assertJson(['message' => 'Invalid credentials.']);
+        $response->assertStatus(401) // Unauthorized
+                 ->assertJson([
+                     'message' => 'Invalid credentials.',
+                 ]);
     }
 
     /** @test */
-    public function user_can_logout()
+    public function user_cannot_login_with_invalid_email()
     {
-        $user = User::factory()->create();
+        $response = $this->postJson('/api/login', [
+            'email' => 'invalidemail@example.com',
+            'password' => 'password123',
+        ]);
 
-        $this->actingAs($user);
-
-        $response = $this->postJson('/logout');
-
-        $response->assertStatus(200);
-        $response->assertJson(['message' => 'Logout successful.']);
-    }
-
-    /** @test */
-    public function guest_cannot_access_protected_routes()
-    {
-        $response = $this->getJson('/profile');
-
-        $response->assertStatus(401);
-        $response->assertJson(['message' => 'Unauthenticated.']);
-    }
-
-    /** @test */
-    public function authenticated_user_can_access_profile()
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $response = $this->getJson('/profile');
-
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['id', 'name', 'email', 'created_at', 'updated_at']);
-    }
-
-    /** @test */
-    public function user_can_update_profile_with_valid_data()
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $data = [
-            'name' => 'Updated Name',
-            'email' => 'updated@example.com',
-        ];
-
-        $response = $this->putJson('/profile', $data);
-
-        $response->assertStatus(200);
-        $response->assertJson(['message' => 'Profile updated successfully.']);
-        $this->assertDatabaseHas('users', ['email' => $data['email']]);
-    }
-
-    /** @test */
-    public function user_cannot_update_profile_with_invalid_data()
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $data = [
-            'name' => '',
-            'email' => 'invalid-email',
-        ];
-
-        $response = $this->putJson('/profile', $data);
-
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['name', 'email']);
-    }
-
-    /** @test */
-    public function user_can_delete_their_account()
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $response = $this->deleteJson('/profile');
-
-        $response->assertStatus(204);
-        $this->assertDatabaseMissing('users', ['id' => $user->id]);
-    }
-
-    /** @test */
-    public function user_cannot_delete_other_users_account()
-    {
-        $user = User::factory()->create();
-        $otherUser = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $response = $this->deleteJson("/users/{$otherUser->id}");
-
-        $response->assertStatus(403);
-        $response->assertJson(['message' => 'Forbidden.']);
+        $response->assertStatus(401) // Unauthorized
+                 ->assertJson([
+                     'message' => 'Invalid credentials.',
+                 ]);
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserLoanController;
 use App\Http\Controllers\AdminLoanController;
 use App\Models\Admin;
+
 // Admin routes
 
 
@@ -66,3 +67,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     });
 });
+
+Route::get('loans', [LoanController::class, 'index']);
+Route::get('loans/{id}', [LoanController::class, 'show']);
+Route::post('loans', [LoanController::class, 'store']);
+Route::put('loans/{id}/return', [LoanController::class, 'update']);
+Route::delete('loans/{id}', [LoanController::class, 'destroy']);
