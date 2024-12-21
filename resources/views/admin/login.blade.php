@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <h2>Admin Login</h2>
-    <form action="{{ route('user.login.submit') }}" method="POST">
+    <form action="{{ route('admin.login.submit') }}" method="POST">
     @csrf
     <div class="form-group">
         <label>Email</label>

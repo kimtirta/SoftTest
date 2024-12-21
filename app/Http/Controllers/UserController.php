@@ -11,21 +11,29 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function loginSubmit(Request $request)
-{
-    // Validate the request
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required|string|min:6', // Adjust min length based on your requirements
-    ]);
+    {
+        $request->validate([
+            'email' => 'required|email|max:255',
+            'password' => 'required|string|min:8|max:64',
+        ], [
+            'email.required' => 'The email field is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.max' => 'The email address must not exceed 255 characters.',
+            'password.required' => 'The password field is required.',
+            'password.min' => 'The password must be at least 8 characters.',
+            'password.max' => 'The password must not exceed 64 characters.',
+        ]);
+    
+        $credentials = $request->only('email', 'password');
+        
+        if (Auth::attempt($credentials)) {
+            return redirect()->route('user.dashboard'); // or the relevant route
+        }
 
-    $credentials = $request->only('email', 'password');
-
-    if (Auth::attempt($credentials)) {
-        return redirect()->route('user.dashboard');
+    
+        return back()->withErrors(['email' => 'Invalid credentials']);
     }
-
-    return back()->withErrors(['email' => 'Invalid credentials']);
-}
+    
 public function showLoginForm()
 {
     return view('user.login');

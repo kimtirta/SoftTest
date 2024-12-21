@@ -10,25 +10,45 @@ use App\Models\Book;
 class AdminController extends Controller
 {
     public function login()
-    {
-        return view('admin.login');
+{
+    // Redirect authenticated admins to the dashboard if already logged in
+    if (Auth::guard('admin')->check()) {
+        return redirect()->route('admin.dashboard');
     }
 
-    public function loginSubmit(Request $request)
+    return view('admin.login');
+}
+
+
+public function loginSubmit(Request $request)
 {
+    // If already logged in, redirect to the dashboard
+    if (Auth::guard('admin')->check()) {
+        return redirect()->route('admin.dashboard');
+    }
+
     $request->validate([
-        'email' => 'required|email',
-        'password' => 'required|string|min:6',
+        'email' => 'required|email|max:255',
+        'password' => 'required|string|min:8|max:64',
+    ], [
+        'email.required' => 'The email field is required.',
+        'email.email' => 'Please enter a valid email address.',
+        'email.max' => 'The email address must not exceed 255 characters.',
+        'password.required' => 'The password field is required.',
+        'password.min' => 'The password must be at least 8 characters.',
+        'password.max' => 'The password must not exceed 64 characters.',
     ]);
 
     $credentials = $request->only('email', 'password');
 
     if (Auth::guard('admin')->attempt($credentials)) {
-        return redirect()->route('admin.dashboard');
+        return redirect()->route('admin.dashboard');  
     }
 
     return back()->withErrors(['email' => 'Invalid credentials']);
 }
+
+
 
     public function dashboard()
     {
@@ -47,6 +67,7 @@ class AdminController extends Controller
             'books' => Book::all(),
             'loans' => $recent_loans, // Pass the limited loans
         ]);
+
     }
     
 

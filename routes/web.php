@@ -38,14 +38,7 @@ Route::get('admin/loans/create', [AdminLoanController::class, 'create'])->name('
 Route::get('admin/loans/{loan}/edit', [AdminLoanController::class, 'edit'])->name('admin.loans.edit');
 Route::post('admin/loans/{loan}/return', [AdminLoanController::class, 'markAsReturned'])->name('admin.loans.return');
 
-Route::prefix('admin')->group(function () {
-    Route::get('/login', [AdminController::class, 'login'])->name('admin.login');
-    Route::post('/login-submit', [AdminController::class, 'loginSubmit'])->name('admin.login.submit');
 
-    Route::middleware('auth:admin')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    });
-});
 
 // Book routes
 Route::get('/admin/books', [BookController::class, 'index'])->name('books.index');
@@ -64,3 +57,12 @@ Route::post('/admin/transactions/{id}/pay', [TransactionController::class, 'mark
 Route::post('/user/login', [UserController::class, 'loginSubmit'])->name('user.login.submit');
 Route::get('/user/login', [UserController::class, 'showLoginForm'])->name('user.login');
 
+Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminController::class, 'login'])->name('admin.login');
+    Route::post('/login-submit', [AdminController::class, 'loginSubmit'])->name('admin.login.submit');
+
+    Route::middleware('auth:admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    });
+});
